@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🌈 WWM Tool | Luxielx</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 35px #ff69b4; /* Pink Glow */
+            width: 700px;
+            text-align: center;
+            border: 2px solid #333;
+            position: relative;
+        }
+        h2 { margin-top: 0; color: #ff99cc; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        
+        .label { font-size: 14px; color: #888; margin-bottom: 5px; display: block; text-align: left; font-weight: bold; }
+        
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        select#theme {
+            width: 100%;
+            padding: 10px;
+            background-color: #2d2d2d;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #2d2d2d;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px; 
+            padding: 5px;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .checkbox-wrapper:hover { border-color: #ff99cc; background: #252525; }
+        .checkbox-wrapper input { margin-right: 5px; accent-color: #ff99cc; }
+
+        /* Input */
+        textarea#input {
+            width: 100%;
+            height: 80px;
+            background-color: #2d2d2d;
+            border: 2px solid #555;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            resize: none;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        textarea#input:focus { border-color: #ff99cc; }
+
+        #status { font-weight: bold; margin: 15px 0; min-height: 25px; color: #555; font-size: 16px; }
+
+        #preview {
+            width: 100%;
+            min-height: 80px;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #000;
+            border: 2px dashed #444;
+            padding: 15px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+        }
+
+        /* WATERMARK STYLING */
+        .watermark {
+            margin-top: 25px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .watermark span { color: #ff99cc; }
+        .watermark .ign { color: #aaa; margin-left: 5px; }
+
+        #hiddenCopy { position: absolute; left: -9999px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🥺 WWM Beggar Tool</h2>
+    
+    <span class="label">1. Configure Vibe:</span>
+    <div class="options-grid">
+        <select id="theme">
+            <option value="rainbow">🌈 Pastel Rainbow</option>
+            <option value="mommy">💖 Mommy Mode</option>
+            <option value="fire">🔥 Fire / Anger</option>
+            <option value="ocean">🌊 Ocean Ice</option>
+            <option value="gold">💰 Gold / Money</option>
+            <option value="toxic">☢️ Toxic / Stinky</option>
+            <option value="goth">🖤 Goth Mode</option>
+        </select>
+        
+        <label class="checkbox-wrapper" title="Shifts the color start point randomly">
+            <input type="checkbox" id="randColorCheck">
+            <span>🎲 Seed</span>
+        </label>
+
+        <label class="checkbox-wrapper">
+            <input type="checkbox" id="kittenCheck" checked>
+            <span>🐾 Kitten</span>
+        </label>
+
+        <label class="checkbox-wrapper">
+            <input type="checkbox" id="stutterCheck">
+            <span>🥺 Stutter</span>
+        </label>
+        
+        <label class="checkbox-wrapper">
+            <input type="checkbox" id="emoteCheck">
+            <span>🤡 Emote</span>
+        </label>
+    </div>
+
+    <span class="label">2. Paste or Type:</span>
+    <textarea id="input" placeholder="Type here (e.g. Give me pearls)..." oninput="handleInput(event)" onkeydown="handleKey(event)"></textarea>
+    
+    <div id="status">Ready...</div>
+
+    <span class="label">Preview:</span>
+    <div id="preview">Waiting...</div>
+    
+    <div class="watermark">
+        Made by <span>Luxielx</span> <span class="ign">- IGN: Nilou 4026946650</span>
+    </div>
+
+    <textarea id="hiddenCopy"></textarea>
+</div>
+
+<script>
+    // --- EMOTES ---
+    const KITTEN_EMOTES = ["[#255]","[#25]","[#261]","[#262]","[#263]","[#207]","[#209]","[#254]","[#256]","[#253]","[#297]","[#226]","[#233]"];
+
+    function handleInput(e) { if (e.inputType === 'insertFromPaste') processInput(); }
+    function handleKey(e) { if (e.key === "Enter") { e.preventDefault(); processInput(); } }
+
+    function hslToHex(h, s, l) {
+        h = h % 360; if (h < 0) h += 360;
+        s /= 100; l /= 100;
+        let c = (1 - Math.abs(2 * l - 1)) * s,
+            x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+            m = l - c / 2,
+            r = 0, g = 0, b = 0;
+        if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+        else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+        else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+        else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+        else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+        else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+        return "#" + [r, g, b].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+    }
+
+    function chance(percent) { return Math.random() < percent; }
+    
+    function matchCase(original, replacement) {
+        if (original === original.toUpperCase() && original !== original.toLowerCase()) return replacement.toUpperCase();
+        if (original[0] === original[0].toUpperCase()) return replacement.charAt(0).toUpperCase() + replacement.slice(1).toLowerCase();
+        return replacement.toLowerCase();
+    }
+
+    function processInput() {
+        var inputBox = document.getElementById("input");
+        var inputVal = inputBox.value;
+        var theme = document.getElementById("theme").value;
+        var useRandColor = document.getElementById("randColorCheck").checked;
+        var useKitten = document.getElementById("kittenCheck").checked;
+        var useStutter = document.getElementById("stutterCheck").checked;
+        var useEmote = document.getElementById("emoteCheck").checked;
+        
+        var status = document.getElementById("status");
+        var previewBox = document.getElementById("preview");
+        var hiddenCopy = document.getElementById("hiddenCopy");
+
+        if (!inputVal || inputVal.trim() === "") return;
+
+        // --- 1. KITTEN MODE ---
+        if (useKitten) {
+            const replaceSmart = (text, regex, newWord, prob) => text.replace(regex, (match) => chance(prob) ? matchCase(match, newWord) : match);
+            inputVal = replaceSmart(inputVal, /please/gi, "pwease", 0.8);
+            inputVal = replaceSmart(inputVal, /pearls/gi, "pwearls", 0.8);
+            inputVal = replaceSmart(inputVal, /mommy/gi, "myommy", 0.8);
+            inputVal = replaceSmart(inputVal, /love/gi, "wuv", 0.8);
+            inputVal = replaceSmart(inputVal, /give/gi, "gib", 0.8);
+            inputVal = inputVal.replace(/na/gi, (m) => chance(0.5) ? matchCase(m, "nya") : m);
+            inputVal = inputVal.replace(/no/gi, (m) => chance(0.5) ? matchCase(m, "nyo") : m);
+            inputVal = inputVal.replace(/l/gi, (m) => chance(0.6) ? matchCase(m, "w") : m);
+            inputVal = inputVal.replace(/r/gi, (m) => chance(0.6) ? matchCase(m, "w") : m);
+        }
+
+        // --- 2. STUTTER ---
+        if (useStutter) {
+            let words = inputVal.split(" ");
+            inputVal = words.map(word => {
+                if ((word.length > 2 || word.toLowerCase() === "i") && !word.includes('[')) {
+                    let roll = Math.random();
+                    if (roll < 0.10) return word.charAt(0) + "-" + word.charAt(0) + "-" + word;
+                    else if (roll < 0.40) return word.charAt(0) + "-" + word;
+                }
+                return word;
+            }).join(" ");
+            if (chance(0.5)) inputVal += "..."; 
+        }
+
+        // --- 3. CURATED EMOTE ---
+        if (useEmote) {
+            let randomEmote = KITTEN_EMOTES[Math.floor(Math.random() * KITTEN_EMOTES.length)];
+            inputVal += " " + randomEmote;
+        }
+
+        // --- 4. COMPRESSION ---
+        const MAX = 250; const HEX = 7;
+        let segments = inputVal.split(/(\[.*?\])/g).map(s => {
+            return (s.startsWith('[') && s.endsWith(']')) ? s : s.replace(/#[0-9a-fA-F]{6}/g, "");
+        });
+
+        let rawLen = 0, emoteLen = 0;
+        segments.forEach(s => (s.startsWith('[') && s.endsWith(']')) ? emoteLen += s.length : rawLen += s.length);
+        
+        let space = MAX - (rawLen + emoteLen);
+        let step = (space <= 0) ? 50 : Math.ceil((rawLen * HEX) / space);
+        if (step < 1) step = 1;
+
+        // --- 5. COLORING WITH SEED ---
+        let rawOutput = "";
+        let htmlPreview = "";
+        let charIdx = 0;
+        
+        let colorOffset = useRandColor ? Math.random() : 0.0;
+
+        segments.forEach(seg => {
+            if (seg.startsWith('[') && seg.endsWith(']')) {
+                rawOutput += seg;
+                htmlPreview += `<span style="color:white; background:#333; border:1px solid #555; padding:2px 5px; border-radius:4px; margin:0 2px; font-size:14px;">${seg}</span>`;
+            } else {
+                for (let i = 0; i < seg.length; i += step) {
+                    let chunk = seg.substring(i, i + step);
+                    
+                    let h=0, s=100, l=85; 
+                    let p = charIdx / (rawLen || 1);
+                    let effectiveP = (p + colorOffset) % 1.0;
+
+                    if (theme === 'rainbow') h = effectiveP * 360;
+                    else if (theme === 'mommy') { h = 280 + (effectiveP * 120); l = 80; }
+                    else if (theme === 'fire') { h = 0 + (effectiveP * 55); l = 75; }
+                    else if (theme === 'ocean') { h = 180 + (effectiveP * 70); l = 80; }
+                    else if (theme === 'gold') { h = 35 + Math.sin((p + colorOffset) * Math.PI * 2) * 20; s = 100; l = 75; }
+                    else if (theme === 'toxic') { h = 90 + (effectiveP * 60); s = 100; l = 75; }
+                    else if (theme === 'goth') { h = 260 + (effectiveP * 60); s = 60; l = 65; }
+
+                    let hex = hslToHex(h, s, l);
+                    
+                    rawOutput += hex + chunk;
+                    htmlPreview += `<span style="color:${hex}">${chunk}</span>`;
+                    charIdx += chunk.length;
+                }
+            }
+        });
+
+        previewBox.innerHTML = htmlPreview;
+        hiddenCopy.value = rawOutput;
+        hiddenCopy.select();
+        
+        try {
+            document.execCommand('copy');
+            status.innerText = "✅ COPIED!";
+            status.style.color = "#00ff00";
+            setTimeout(function() { inputBox.value = ""; inputBox.focus(); }, 10);
+        } catch (err) {
+            status.innerText = "⚠️ Copy Failed";
+            status.style.color = "red";
+        }
+    }
+    
+    window.onload = function() { document.getElementById("input").focus(); }
+</script>
+
+</body>
+</html>
